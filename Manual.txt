@@ -1,0 +1,280 @@
+OAuth2Android - Short introduction
+============================
+How to connect to your favorit API using this library.
+--------------------------------------------------------------------------
+
+
+INDEX
+======
+	* Before you begin
+	* Start programming
+		- initialization
+		- specials
+	* Request Authorization
+		- authorization code
+		- user password credentials
+		- client credentials
+	* Request Access Token
+	* Refresh Access Token
+	* Request Protected Resource
+
+
+Befor you begin
+=============
+Before you start coding you need the following two things:
+	
+	* The library
+	-----------------
+	Download the library (the jar file will do) and import it into your application.
+	If you don't have a copy of the library goto:  ......
+	
+	* OAuth Credentials
+	-----------------------------
+	Go to your service providers webpage and register the application you want to develop. 
+	Mostly the service provider wants to know what your application does and if it is a web-application
+	or a desktop application. This Library is especially for Android Apps so you might want to to register a
+	mobile application (you can choose "desktop application" if the service provider doesn't give you any other
+	choices). 
+	You can give your application a logo and a webpage the user will be refered to if he wants to know more
+	about it. And you have to give a so called "Redirect URI", this is a uri the server redirects the
+	client to after a request has been made. Installed applications like mobile apps don't use redirect uris, the 
+	redirect uri must be something like "oob" (out of band). See the service providers documentation for details.
+	
+	In return for registering  you get a set of credentials:
+				- "application key"or "client id"
+				- "application secret" or "client secret"
+	write them down, or save them somewhere, because you will need them later.
+	
+
+Start programming
+===============
+Before you start programming,  there are two things you might want to find out first. Read in the documentation
+of your service provider and look for:
+
+		* Authorization method or How to get an access token. 
+		------------------------------------------------------------------------------
+		In order to get the first access token, the resource owner (the user) needs to authorize the client (your application) to access 
+		his data on the service providers servers. The OAuth protocol specifies different proptocol flows on how to get this authorization
+		(for example the Authorization-Code-Flow). Read in the documentation, wich flow the service provider supports. 
+		If there is something like: ".... the user needs to copy and paste this code into his application...." then the service
+		provider wants you to use the Authorization-Code-Flow.
+		That is what you need to know.
+	
+		* Token Type
+		-------------------
+		You need to know what kind of tokens the provider issues. Mostly they will use the simpliest one : the BEARER-Token.
+	 	A bearer token has only a single string looking like this: 
+	 	access_token = "1/Hug7230dkjnISDnjk1067Hku83"
+	 	The other token type this library currently supports is the MAC token wich has also a token secret to create a signature for 
+	 	your messages. 
+	 	If you are not sure, wich token type your provider uses, leave it be and we will try the default type
+ 
+
+In order for your application to be able to connection to the internet, you need to edit your "AndroidManifest.xml" and add this line:
+
+ <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+ 
+ 
+ 
+ Initialization
+ -----------------	
+ Now you can begin programming : 
+ 
+ 
+ 1) Initialize a Client with the OAuth credentials given to you by the service provider earlier:
+ 
+		org.gerstner.oauth2android.Client  client = new Client(clientId, clientSecret, redirectUri);
+		
+		
+ 2) Initialize a Server with the URLs the service provider wants you to use:
+ 
+		org.gerstner.oauth2android.Server server = new Server(accessTokenEndpoint, requestEndpoint, authotizationEndpoint);
+ 	
+ 	
+ 3) Define wich token type you are using :
+ 
+ 	  org.gerstner.oauth2android.token.TokenTypeDefinition tokenTypeDefinition = new BearerTokenTypeDefinition();  // for BEARER Tokens
+ 	  org.gerstner.oauth2android.token.TokenTypeDefinition tokenTypeDefinition = new MacTokenTypeDefinition();     // for MAC Tokens
+ 	  org.gerstner.oauth2android.token.TokenTypeDefinition tokenTypeDefinition = new DefaultTokenTypeDefinition();  // if you don't know try this
+ 	  
+ 	  
+ 4) Initialize the OAuth-Object with this parameters:
+ 
+ 	 org.gerstner.oauth2android.OAuth oAuth = new OAuth( server, client, tokenTypeDefinition );
+ 	  
+
+ 5) some service providers want you to specify the "scope" of the authorization - which resources your application
+ actually wants to access. For example if your application wants to download photos from a private photo album
+ the scope might be something like: "read/myPhotoAlbum"
+ How the scope is defined is up to the service provider. Read the service providers API - documentation for more information.
+ 
+ 	oAuth.addScope( scope );			// expects a single String - a single scope. You can call this many thimes.
+ 	
+ 	or
+ 	
+ 	oAuth.setScope( scopeArray );  // expects a String-Array containing all scopes 
+
+
+Now you are ready to go. The OAuth-Object is used to handle all communications to the service provider.
+With this given configuration it knows everything it needs to make autorized calles to the API.
+
+
+Special
+-----------
+Here are a few things you might want to configure your Server with. But you don't need to - just use this if your service provider
+wants something out of the ordinary.
+	
+	a)  Set the preferred HTTP - Method (GET, POST, PUT, DELETE) the service provider wants you to use for accessing a protected resource.
+
+		server.setPreferredHttpMethod( Connection.HTTP_METHOD_GET )			// use the GET method
+		
+  b)  If the service provider doesn't want you to use the "Authorization"-Header for presenting the Access-Token or maybe you run into some
+		  unexpected difficulties with your device,  you may present it in an other way.
+		  But be aware that this is really not recommendable, your service provider HAS to be able to use the authorization header (in according to the 
+		  OAuth 2.0 specification), and not all token types can be handled otherwise.
+
+  		server.useAuthorizationHeader( false );	// the Access Token will be presented in the requests body
+  		
+
+Request Authorization
+==================
+This is the part, where your application has to ask the user for access to the service provider. Or more correct: it has to ask the owner of the 
+protected resources for authorization, so that the user of your application (the user may be the owner himself, but doesn't necessarily have to be)
+has the right to read or manipulate the protected resources.
+This library provides three different ways to do so:
+
+		* authorization code
+		-----------------------------
+		This is the recommended way to use. 
+		It works like this: 
+		 
+	  5) use the OAuth object (you created in step 4) to get the URI to the Authorization Server with all the parameters you need.
+	
+		String authorizationUri =	oAuth.returnAuthorizationRequestUri();   
+
+     6) take this uri-String and call Androids web browser
+		
+		  Uri uri = Uri.parse( authorizationUri );
+        Intent intent = new Intent( Intent.ACTION_VIEW, uri );
+        startActivity( intent );
+        
+    7) the browser will open and the user will be directed to the uri you gave hime before. This is a website of the service provider 
+       where the user needs to ask the resource owner (if it's not himself) to login and authorize your application to access the resources.
+       This is the last time the user or resource owner will be asked for a password, and in addition to that your application doesn't even come
+       in contact with the password.
+       The website should display some information on what kind of application you developed (according to the descriptions you gave before when registering) 
+       and which resources the application likes to access.
+       If the Resource Owner accepts and authorizes your application, the website will display an authorization code.
+       It is a fairly simple code (so the user can memorize it for a few seconds)
+       
+   8) The user now copies the code (Android can do that) and closes the web browser (maybe he wants to log out first).
+       The application will appear again, where you should provide a text input field for the user to paste the code into.
+       
+   9) Now you can read the code from the text input field into a String and pass it to this method:
+       
+	       executeAccessTokenRequest( String authorizationCode );
+	       
+	     If everything goes as planned, you should get an access token in the response. This method returns a Response object, wich you can read and play around with
+	     but you don't really need it. The access token will automatically be detected and put into your client object.
+	       
+		
+		*user password credentials
+		---------------------------------------
+		If you can't open a web browser, you can ask the resource owner to input his "username" and "password" directly into you application. This method is only included in the
+		library, because it is possible. It is not very elegant though. Of course you have to provide two input fields for the resource owner to input his credentials. Those you can read 
+		and pass along to this method:
+		
+		executeAccessTokenRequest( username, password );
+		
+		Please be advised that you must not save these credentials under any circumstances.
+		
+		
+		*client credentials
+		--------------------------
+		If your application is only handling non protected resources (for example if the application is also the resource owner) the service provider might accept only the client credentials 
+		for authorization. 
+		
+		executeAccessTokenRequest();			// since the application already knows the client credentials no parameters are needed here
+		
+		
+
+
+Request Protected Resource
+=======================
+To access the protected resources you need to know more on how to work with the API from your service provider.
+The resource should have a uri pointing to it as for example: https://www.myService.com/resource
+It may be that you call a single resource with a specific uri as in  https://www.myService.com/resource/Me/MyPhotoAlbum/102.jpg
+Or you have to provide additional parameters: user="Me", album="MyPhotoAlbum", photo="102.jpg"
+Read the API documentation on how to access the resources. 
+Here is an example on how it works:
+
+10)	  List<NameValuePair> parameter = new ArrayList<NameValuePair>();     // create a list for parameters
+        parameter.add(new BasicNameValuePair("photo", "102.jpg")); 						 // add a parameter (here: photo=102.jpg)
+        String requestUri = "/request";			// only the last part (e.g: "https://www.myService.com/resource"  -> requestUri= "/resource"
+ 
+ 
+ 11)   call
+			Response response = 	executeProtectedResourceRequest( requestUri, parameter );
+
+12) The resource you requested is now included in the response object. You can extract it for example by calling 
+
+			response.getResponseString();
+
+
+(.....)
+
+
+
+Example:
+--------------
+This is what your code could look like right now:
+
+
+// your imports
+import org.gerstner.oauth2android.Client;
+import org.gerstner.oauth2android.Server;
+import org.gerstner.oauth2android.OAuth;
+import org.gerstner.oauth2android.token.TokenTypeDefinition;
+
+
+// initializations
+
+ Server server = new Server( accessTokenEndpoint, requestEndpoint, authotizationEndpoint );
+ Client  client = new Client( clientId, clientSecret, redirectUri );
+ TokenTypeDefinition tokenTypeDefinition = new BearerTokenTypeDefinition();  
+ OAuth oAuth = new OAuth( server, client, tokenTypeDefinition );
+ oAuth.addScope( "photos" );
+ oAuth.addScope( "friends" );
+ oAuth.addScope( "private" );
+ 
+ 
+ // request Authorization
+ 
+ String authorizationUri =	oAuth.returnAuthorizationRequestUri();   
+ Uri uri = Uri.parse( authorizationUri );
+ Intent intent = new Intent( Intent.ACTION_VIEW, uri );
+ startActivity( intent );
+ 
+ // provide text input field for authorization code here
+ 
+  // request access Token
+  List<NameValuePair> parameter = new ArrayList<NameValuePair>();    
+  parameter.add(new BasicNameValuePair("photo", "1.jpg")); 						
+  String requestUri = "/request";			
+ 
+ Response response = 	executeProtectedResourceRequest( requestUri, parameter );
+ 
+  String result =  response.getResponseString();
+  
+  // do something with the resulting String....
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
