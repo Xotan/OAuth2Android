@@ -2,7 +2,7 @@
 			*  OAuth2Android  *
 			***********************
 
-As the name already implies this project shall make the use of OAuth 2.0 easier in Android Apps. Since Android offers many possibilities  for mobile applications sharing contents  and using online services to enhance those applications, it would be a shame not to use the latest open protocol that allows secure API authorization.
+As the name already implies this project shall make the use of OAuth 2.0 easier in Android Apps. Android offers many possibilities for mobile applications to share content and to use online services that enhance their features. However, it would be a shame not to use the latest open protocol that allows secure API authorization.
 
 This library is currently developed to satisfy the requirements of the following OAuth 2.0 drafts:
 	- draft-ietf-oauth-v2-16  
@@ -12,10 +12,10 @@ This library is currently developed to satisfy the requirements of the following
 	  (http://tools.ietf.org/id/draft-hammer-oauth-v2-mac-token-05.txt)
 	  
 	  
-Since theses are only drafts, and the protocols specification is still in progress , the library needs still a lot of development and adjustments. 
+Since theses are only drafts and the protocols specification is still in progress, the library still needs a lot of development and adjustment.
 
 I am planing to upload the library at the beginning of August 2011.
-Sorry that this can't happen sooner. 
+Sorry that this can't happen sooner.
 
 For any questions, please don't hesitate to contact me.
 
