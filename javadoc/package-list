@@ -1,0 +1,7 @@
+org.gerstner.oauth2android
+org.gerstner.oauth2android.common
+org.gerstner.oauth2android.exception
+org.gerstner.oauth2android.response
+org.gerstner.oauth2android.token
+org.gerstner.oauthlibrary.test
+org.gerstner.test
