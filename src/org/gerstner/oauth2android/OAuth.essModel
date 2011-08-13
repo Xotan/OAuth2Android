@@ -1,0 +1,28 @@
+[Box: ::org.gerstner.oauth2android - ::org.gerstner.oauth2android::Client]
+X=20
+Y=40
+
+[Box: ::org.gerstner.oauth2android - ::org.gerstner.oauth2android::OAuth]
+X=541
+Y=30
+
+[Box: ::org.gerstner.oauth2android - ::org.gerstner.oauth2android::Server]
+X=288
+Y=35
+
+[Diagram: ::org.gerstner.oauth2android]
+OffsetX=0
+OffsetY=0
+Visibility=0
+ShowAssoc=0
+
+[Box:  - ::org.gerstner.oauth2android]
+X=20
+Y=40
+
+[Diagram: ]
+OffsetX=0
+OffsetY=0
+Visibility=0
+ShowAssoc=0
+
