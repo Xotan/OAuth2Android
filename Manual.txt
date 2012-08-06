@@ -1,5 +1,12 @@
 OAuth2Android - Short introduction
 ============================
+OAuth 2.0 is still a draft and not yet completed which is a pitty because it is such a powerful tool and has more and more applications 
+every day. Since there are still so many changes in the definition of OAuth, it is hard to keep track and this library up to date.
+So please forgive me if this library hasn't been updated for quite a while now. Although I hope to be able to fix some bugs that have 
+been reported, soon. I wanted to thank you all for your support and detailed bugreports on that.
+
+
+
 How to connect to your favorite API using this library.
 --------------------------------------------------------------------------
 
@@ -44,6 +51,7 @@ Before you start coding you need the following two things:
 				- "application key" or "client id"
 				- "application secret" or "client secret"
 	write them down, or save them somewhere, because you will need them later.
+
 	
 
 Start programming
@@ -88,7 +96,7 @@ In order for your application to be able to connect to the Internet, you need to
 		
  2) Initialize a Server with the URLs that the service provider wants you to use:
  
-		org.gerstner.oauth2android.Server server = new Server(accessTokenEndpoint, requestEndpoint, authotizationEndpoint);
+		org.gerstner.oauth2android.Server server = new Server(authorizationEndpoint, accessTokenEndpoint, requestEndpoint);
  	
  	
  3) Define which token type you are using :
@@ -122,7 +130,7 @@ With the given configuration it has all the necessary information to make author
 Special
 -----------
 Here are a few things you might want to configure your Server with. But you don't need to - just use this if your service provider
-wants something out of the ordinary.
+wants something out of the ordinary.  *[Apparently a NullPointerException gets thrown if the setPreferredHttpMethod() is not called - calling it with an empty String is sufficient]
 	
 	a)  Set the preferred HTTP - Method (GET, POST, PUT, DELETE) the service provider wants you to use for accessing a protected resource.
 
